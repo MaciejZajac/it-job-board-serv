@@ -5,7 +5,7 @@ const graphqlSchema = require("./graphql/schema");
 const graphqlResolver = require("./graphql/resolvers");
 
 const graphqlHTTP = require("express-graphql");
-const MONGODB_URI = "mongodb+srv://maciej:132639@cluster0-m9slc.mongodb.net/board";
+const MONGODB_URI = "mongodb+srv://maciej:132639@cluster0-m9slc.mongodb.net/jobboard";
 
 const app = express();
 
@@ -52,7 +52,7 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
-    .connect(MONGODB_URI)
+    .connect(MONGODB_URI, { useUnifiedTopology: true, useNewUrlParser: true })
     .then(result => {
         console.log("connected!");
         app.listen(8080);
