@@ -4,16 +4,58 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
+const jwt = require("jsonwebtoken");
 
 const transporter = nodemailer.createTransport(
   sendgridTransport({
     auth: {
-      api_user: ""
+      api_user:
+        "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"
     }
   })
 );
 
 module.exports = {
+  login: async function({ email, password }) {
+    const errors = [];
+    if (!validator.isEmail(email)) {
+      errors.push({ message: "Email is invalid." });
+    }
+    if (!validator.isLength(password, { min: 3 })) {
+      errors.push({ message: "Password is invalid." });
+    }
+    if (errors.length > 0) {
+      const error = new Error("Invalid error.");
+      error.data = errors;
+      error.code = 422;
+      throw error;
+    }
+
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      const error = new Error("There is such email in a database already.");
+      throw error;
+    }
+    const isEqual = await bcrypt.compare(password, user.password);
+    if (!isEqual) {
+      const error = new Error("Wrong password.");
+      error.code = 401;
+      throw error;
+    }
+    const token = jwt.sign(
+      {
+        email: user.email,
+        userId: user._id.toString()
+      },
+      "superultra secret password omg lol yolo",
+      { expiresIn: "1h" }
+    );
+
+    return {
+      token: token,
+      userId: user._id.toString()
+    };
+  },
   createUser: async function({ userInput }, req) {
     const { email, password } = userInput;
 
@@ -50,51 +92,40 @@ module.exports = {
       _id: createdUser._id.toString()
     };
   },
-  resetPassword: function({ email }, req) {
-    crypto.randomBytes(32, async (err, buffer) => {
-      if (err) {
-        const error = new Error("Something went wrong.");
-        error.code = 500;
-        throw error;
-      }
+  resetPassword: async function({ email }, req) {
+    const errors = [];
 
-      const errors = [];
+    if (!validator.isEmail(email)) {
+      errors.push({ message: "Invalid email" });
+    }
 
-      if (!validator.isEmail(email)) {
-        errors.push({ message: "Invalid email" });
-      }
+    if (errors.length > 0) {
+      const error = new Error("Invalid data");
+      error.data = errors;
+      error.code = 422;
+      throw error;
+    }
 
-      if (errors.length > 0) {
-        const error = new Error("Invalid data");
-        error.data = errors;
-        error.code = 422;
-        throw error;
-      }
+    const existingUser = await User.findOne({ email: email });
+    if (!existingUser) {
+      const error = new Error("No such user in a database.");
+      throw error;
+    }
 
-      const existingUser = await User.findOne({ email: email });
-      console.log("existingUser", existingUser);
-      if (!existingUser) {
-        const error = new Error("No such user in a database.");
-        throw error;
-      }
+    const token = "3214567";
+    existingUser.resetToken = token;
+    existingUser.resetTokenExpiration = Date.now() + 3600000;
+    await existingUser.save();
 
-      const token = buffer.toString("hex");
-      existingUser.resetToken = token;
-      existingUser.resetTokenExpiration = Date.now() + 3600000;
-      await existingUser.save();
-
-      transporter.sendMail({
-        to: email,
-        from: "itJobBoard@itboard.com",
-        subject: "Reset password IT BOARD",
-        html: `
-            <p>You requested a password reset</p>
-            <p>Click this <a href="http://localhost:3001/reset/${token}">link</a> to set a new password.</p>
-            `
-      });
-      console.log("sendingmail...");
-      console.log("email", email);
-      return { email: email };
+    transporter.sendMail({
+      to: email,
+      from: "itJobBoard@itboard.com",
+      subject: "Reset password IT BOARD",
+      html: `
+              <p>You requested a password reset</p>
+              <p>Click this <a href="http://localhost:3001/reset/${token}">link</a> to set a new password.</p>
+              `
     });
+    return { email: email };
   }
 };

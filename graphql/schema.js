@@ -40,11 +40,11 @@ module.exports = buildSchema(`
 
     type RootQuery {
         login(email: String!, password: String!): AuthData!
-        resetPassword(email: String!): resetPassword!
     }
 
     type RootMutation {
         createUser(userInput: UserInputData): User!
+        resetPassword(email: String!): resetPassword!
     }
 
     schema {
