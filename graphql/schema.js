@@ -1,25 +1,30 @@
 const { buildSchema } = require("graphql");
 
+// type jobOffer {
+//     logoUrl: String!
+//     jobTitle: String!
+//     city: String!,
+//     companyName: String!,
+//     streetName: String!,
+//     creationDate: String!,
+//     minPayment: String!,
+//     maxPayment: String!,
+//     technologies: [String!]
+// }
+
 module.exports = buildSchema(`
 
     type jobOffer {
-        logoUrl: String!
+        _id: ID!
         jobTitle: String!
-        city: String!,
-        companyName: String!,
-        streetName: String!,
-        creationDate: String!,
-        minPayment: String!,
-        maxPayment: String!,
-        technologies: [String!]
+        companyCity: String!
+        companyName: String!
     }
 
     type User {
         _id: ID!
-        name: String!
         email: String!
         password: String
-        status: String!
         jobOffers: [jobOffer!]!
 
     }
@@ -27,6 +32,12 @@ module.exports = buildSchema(`
     input UserInputData {
         email: String!
         password: String!
+    }
+
+    input UserOfferData {
+        jobTitle: String!
+        companyCity: String!
+        companyName: String!
     }
 
     type AuthData {
@@ -45,6 +56,7 @@ module.exports = buildSchema(`
     type RootMutation {
         createUser(userInput: UserInputData): User!
         resetPassword(email: String!): resetPassword!
+        addNewOffer(userInput: UserOfferData): jobOffer!
     }
 
     schema {
