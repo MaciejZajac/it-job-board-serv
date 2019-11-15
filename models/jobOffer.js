@@ -17,6 +17,11 @@ const jobOfferSchema = new Schema({
   companyCity: {
     type: String,
     required: true
+  },
+  creator: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true
   }
   // creationDate: {
   //     type: String,
@@ -36,4 +41,4 @@ const jobOfferSchema = new Schema({
   // }
 });
 
-module.exports = mongoose.model("jobOffer", jobOfferSchema);
+module.exports = mongoose.model("JobOffer", jobOfferSchema);

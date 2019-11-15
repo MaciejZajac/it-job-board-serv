@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const JobOffer = require("../models/jobOffer");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -130,9 +131,15 @@ module.exports = {
   },
   addNewOffer: async function({ userInput }, req) {
     const { companyName, companyCity, jobTitle } = userInput;
-    console.log("req.isAuth", req.isAuth);
     if (!req.isAuth) {
       const error = new Error("Not authenticated.");
+      error.code = 401;
+      throw error;
+    }
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error("Invalid user.");
+      error.data = errors;
       error.code = 401;
       throw error;
     }
@@ -154,5 +161,20 @@ module.exports = {
       error.code = 422;
       throw error;
     }
+
+    const offer = new JobOffer({
+      companyName,
+      companyCity,
+      jobTitle,
+      creator: user
+    });
+    const createdJobOffer = await offer.save();
+    user.jobOffers.push(createdJobOffer);
+    console.log("createdJobOffer", createdJobOffer);
+    await user.save();
+    return {
+      ...createdJobOffer,
+      _id: createdJobOffer._id.toString()
+    };
   }
 };
