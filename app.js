@@ -6,8 +6,7 @@ const graphqlResolver = require("./graphql/resolvers");
 const auth = require("./middleware/auth");
 
 const graphqlHTTP = require("express-graphql");
-const MONGODB_URI =
-  "mongodb+srv://maciej:132639@cluster0-m9slc.mongodb.net/jobboard";
+const MONGODB_URI = "mongodb+srv://";
 
 const app = express();
 

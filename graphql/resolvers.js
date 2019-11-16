@@ -48,7 +48,7 @@ module.exports = {
         email: user.email,
         userId: user._id.toString()
       },
-      "superultra secret password omg lol yolo",
+      "superultrasecretpasswordomglolyolo",
       { expiresIn: "1h" }
     );
 
@@ -170,11 +170,33 @@ module.exports = {
     });
     const createdJobOffer = await offer.save();
     user.jobOffers.push(createdJobOffer);
-    console.log("createdJobOffer", createdJobOffer);
     await user.save();
+
     return {
-      ...createdJobOffer,
+      ...createdJobOffer._doc,
       _id: createdJobOffer._id.toString()
+    };
+  },
+  getOfferList: async function({ ...args }, req) {
+    if (!req.isAuth) {
+      const error = new Error("Not authenticated.");
+      error.code = 401;
+      throw error;
+    }
+
+    const page = 1;
+    const totalJobOffers = await JobOffer.find().totalPosts;
+    const jobOffers = await JobOffer.find()
+      .sort({ createdAt: -1 })
+      .populate("creator");
+    return {
+      jobOffers: jobOffers.map(item => {
+        return {
+          ...item._doc,
+          _id: item._id.toString()
+        };
+      }),
+      totalJobOffers
     };
   }
 };

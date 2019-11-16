@@ -16,8 +16,8 @@ module.exports = buildSchema(`
 
     type jobOffer {
         _id: ID!
-        jobTitle: String!
         companyCity: String!
+        jobTitle: String!
         companyName: String!
     }
 
@@ -48,9 +48,15 @@ module.exports = buildSchema(`
     type resetPassword {
         email: String!
     }
+    
+    type JobOfferData {
+        jobOffers: [jobOffer!]!
+        totalPosts: Int!
+    }
 
     type RootQuery {
         login(email: String!, password: String!): AuthData!
+        getOfferList: JobOfferData!
     }
 
     type RootMutation {
