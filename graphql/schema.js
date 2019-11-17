@@ -54,6 +54,10 @@ module.exports = buildSchema(`
         totalPosts: Int!
     }
 
+    type deleteInfo {
+        result: Boolean!
+    }
+
     type RootQuery {
         login(email: String!, password: String!): AuthData!
         getOfferList: JobOfferData!
@@ -65,7 +69,7 @@ module.exports = buildSchema(`
         createUser(userInput: UserInputData): User!
         resetPassword(email: String!): resetPassword!
         addNewOffer(userInput: UserOfferData): jobOffer!
-        deleteOneOffer(id: ID!): String!
+        deleteOneOffer(id: ID!): deleteInfo!
     }
 
     schema {

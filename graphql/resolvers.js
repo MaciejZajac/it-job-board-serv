@@ -232,6 +232,22 @@ module.exports = {
     };
   },
   deleteOneOffer: async function({ id }, req) {
-    //
+    if (!req.isAuth || !req.userId) {
+      const error = new Error("Not authenticated.");
+      error.code = 401;
+      throw error;
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error("There is no such email in a database already.");
+      throw error;
+    }
+    await JobOffer.findByIdAndDelete(id);
+    user.jobOffers.pull(id);
+    await user.save();
+    return {
+      result: true
+    };
   }
 };
