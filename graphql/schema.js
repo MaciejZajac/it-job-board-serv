@@ -57,12 +57,15 @@ module.exports = buildSchema(`
     type RootQuery {
         login(email: String!, password: String!): AuthData!
         getOfferList: JobOfferData!
+        getPrivateOfferList: JobOfferData!
+        getUserInfo: User!
     }
 
     type RootMutation {
         createUser(userInput: UserInputData): User!
         resetPassword(email: String!): resetPassword!
         addNewOffer(userInput: UserOfferData): jobOffer!
+        deleteOneOffer(id: ID!): String!
     }
 
     schema {

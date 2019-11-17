@@ -177,13 +177,8 @@ module.exports = {
       _id: createdJobOffer._id.toString()
     };
   },
-  getOfferList: async function({ ...args }, req) {
-    if (!req.isAuth) {
-      const error = new Error("Not authenticated.");
-      error.code = 401;
-      throw error;
-    }
 
+  getOfferList: async function({ ...args }, req) {
     const page = 1;
     const totalJobOffers = await JobOffer.find().totalPosts;
     const jobOffers = await JobOffer.find()
@@ -198,5 +193,45 @@ module.exports = {
       }),
       totalJobOffers
     };
+  },
+
+  getPrivateOfferList: async function({ ...args }, req) {
+    if (!req.isAuth || !req.userId) {
+      const error = new Error("Not authenticated.");
+      error.code = 401;
+      throw error;
+    }
+
+    const user = await User.findById(req.userId);
+    const jobOffers = await JobOffer.find({ creator: req.userId });
+    return {
+      jobOffers: jobOffers.map(item => {
+        return {
+          ...item._doc,
+          _id: item._id.toString()
+        };
+      })
+    };
+  },
+  getUserInfo: async function({ ...args }, req) {
+    if (!req.isAuth || !req.userId) {
+      const error = new Error("Not authenticated.");
+      error.code = 401;
+      throw error;
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error("There is no such email in a database already.");
+      throw error;
+    }
+
+    return {
+      ...user._doc,
+      _id: user._id.toString()
+    };
+  },
+  deleteOneOffer: async function({ id }, req) {
+    //
   }
 };
