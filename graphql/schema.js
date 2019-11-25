@@ -43,6 +43,7 @@ module.exports = buildSchema(`
     type AuthData {
         token: String!
         userId: String!
+        email: String!
     }
 
     type resetPassword {
@@ -51,16 +52,22 @@ module.exports = buildSchema(`
     
     type JobOfferData {
         jobOffers: [jobOffer!]!
-        totalPosts: Int!
+        totalOffers: Int!
     }
 
     type deleteInfo {
         result: Boolean!
     }
 
+    input Filter {
+        cityFilter: [String!]
+        specializationFilter: [String!]
+        techFilter: [String!]
+    }
+
     type RootQuery {
         login(email: String!, password: String!): AuthData!
-        getOfferList: JobOfferData!
+        getOfferList(filter: Filter): JobOfferData!
         getPrivateOfferList: JobOfferData!
         getUserInfo: User!
     }

@@ -51,8 +51,8 @@ module.exports = {
       "superultrasecretpasswordomglolyolo",
       { expiresIn: "1h" }
     );
-
     return {
+      email: user.email,
       token: token,
       userId: user._id.toString()
     };
@@ -178,7 +178,8 @@ module.exports = {
     };
   },
 
-  getOfferList: async function({ ...args }, req) {
+  getOfferList: async function({ userFilter }, req) {
+    console.log("userFilter", userFilter);
     const page = 1;
     const totalJobOffers = await JobOffer.find().totalPosts;
     const jobOffers = await JobOffer.find()
