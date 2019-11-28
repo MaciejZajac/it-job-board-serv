@@ -16,9 +16,17 @@ module.exports = buildSchema(`
 
     type jobOffer {
         _id: ID!
-        companyCity: String!
         jobTitle: String!
+        companyCity: String!
         companyName: String!
+        experience: String! 
+        minPayment: String! 
+        maxPayment: String! 
+        companyDescription: String! 
+        projectDescription: String! 
+        companyPage: String! 
+        companyAdress: String! 
+        creationDate: String!
     }
 
     type User {
@@ -38,7 +46,15 @@ module.exports = buildSchema(`
         jobTitle: String!
         companyCity: String!
         companyName: String!
+        experience: String! 
+        minPayment: String! 
+        maxPayment: String! 
+        companyDescription: String! 
+        projectDescription: String! 
+        companyPage: String! 
+        companyAdress: String! 
     }
+
 
     type AuthData {
         token: String!
@@ -67,7 +83,7 @@ module.exports = buildSchema(`
 
     type RootQuery {
         login(email: String!, password: String!): AuthData!
-        getOfferList(filter: Filter): JobOfferData!
+        getOfferList(city: String, spec: String, tech: String): JobOfferData!
         getPrivateOfferList: JobOfferData!
         getUserInfo: User!
     }

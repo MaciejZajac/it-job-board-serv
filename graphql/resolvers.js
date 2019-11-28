@@ -130,12 +130,25 @@ module.exports = {
     return { email: email };
   },
   addNewOffer: async function({ userInput }, req) {
-    const { companyName, companyCity, jobTitle } = userInput;
+    const {
+      jobTitle,
+      companyCity,
+      companyName,
+      experience,
+      minPayment,
+      maxPayment,
+      companyDescription,
+      projectDescription,
+      companyPage,
+      companyAdress
+    } = userInput;
+    console.log("experience", experience);
     if (!req.isAuth) {
       const error = new Error("Not authenticated.");
       error.code = 401;
       throw error;
     }
+
     const user = await User.findById(req.userId);
     if (!user) {
       const error = new Error("Invalid user.");
@@ -145,14 +158,36 @@ module.exports = {
     }
 
     const errors = [];
-    if (!validator.isLength(companyName, { min: 4 })) {
+    if (!validator.isLength(companyName, { min: 3 })) {
       errors.push({ message: "companyName is too short." });
     }
-    if (!validator.isLength(companyCity, { min: 4 })) {
+    if (!validator.isLength(companyCity, { min: 3 })) {
       errors.push({ message: "companyCity is too short." });
     }
-    if (!validator.isLength(jobTitle, { min: 4 })) {
+    if (validator.isEmpty(experience)) {
+      errors.push({ message: "experience can not be empty." });
+    }
+    if (validator.isEmpty(minPayment)) {
+      errors.push({ message: "minPayment can not be empty." });
+    }
+    if (validator.isEmpty(maxPayment)) {
+      errors.push({ message: "maxPayment can not be empty." });
+    }
+
+    if (!validator.isLength(jobTitle, { min: 3 })) {
       errors.push({ message: "jobTitle is too short." });
+    }
+    if (!validator.isLength(companyDescription, { min: 3 })) {
+      errors.push({ message: "companyDescription is too short." });
+    }
+    if (!validator.isLength(companyPage, { min: 3 })) {
+      errors.push({ message: "companyPage is too short." });
+    }
+    if (!validator.isLength(companyAdress, { min: 3 })) {
+      errors.push({ message: "companyAdress is too short." });
+    }
+    if (!validator.isLength(projectDescription, { min: 3 })) {
+      errors.push({ message: "projectDescription is too short." });
     }
 
     if (errors.length > 0) {
@@ -163,9 +198,17 @@ module.exports = {
     }
 
     const offer = new JobOffer({
-      companyName,
-      companyCity,
       jobTitle,
+      companyCity,
+      companyName,
+      experience,
+      minPayment,
+      maxPayment,
+      companyDescription,
+      projectDescription,
+      companyPage,
+      companyAdress,
+      creationDate: new Date().toLocaleDateString(),
       creator: user
     });
     const createdJobOffer = await offer.save();
@@ -178,20 +221,30 @@ module.exports = {
     };
   },
 
-  getOfferList: async function({ userFilter }, req) {
-    console.log("userFilter", userFilter);
+  getOfferList: async function({ ...args }, req) {
+    console.log("args", args);
     const page = 1;
     const totalJobOffers = await JobOffer.find().totalPosts;
+
+    // testing filters
     const jobOffers = await JobOffer.find()
       .sort({ createdAt: -1 })
       .populate("creator");
     return {
-      jobOffers: jobOffers.map(item => {
-        return {
-          ...item._doc,
-          _id: item._id.toString()
-        };
-      }),
+      jobOffers: jobOffers
+        .filter(item => {
+          if (args.city) {
+            return item.companyCity === args.city;
+          } else {
+            return true;
+          }
+        })
+        .map(item => {
+          return {
+            ...item._doc,
+            _id: item._id.toString()
+          };
+        }),
       totalJobOffers
     };
   },
